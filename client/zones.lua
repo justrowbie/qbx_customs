@@ -2,6 +2,7 @@ local zoneId
 local allowAccess = false
 local sharedConfig = require 'config.shared'
 local openCustoms = require('client.menus.main')
+local config = require 'config.client'
 
 local function checkAccess()
     while not cache.vehicle do
@@ -48,58 +49,65 @@ local function calculatePolyzoneCenter(vertices)
     return center
 end
 
-CreateThread(function()
-    for _, v in ipairs(sharedConfig.zones) do
-        lib.zones.poly({
-            points = v.points,
-            onEnter = function(s)
-                zoneId = s.id
-                if not cache.vehicle then return end
-                checkAccess()
-
-                if not allowAccess then
-                    return
-                end
-
-                lib.showTextUI(locale('textUI.tune'), {
-                    icon = 'fa-solid fa-car',
-                    position = 'left-center',
-                })
-            end,
-            onExit = function()
-                zoneId = nil
-                lib.hideTextUI()
-            end,
-            inside = function()
-                if cache.vehicle and allowAccess then
-                    if not lib.isTextUIOpen() then
-                        lib.showTextUI(locale('textUI.tune'), {
-                            icon = 'fa-solid fa-car',
-                            position = 'left-center',
-                        })
-                    end
-                    if IsControlJustPressed(0, 38) then
-                        SetEntityVelocity(cache.vehicle, 0.0, 0.0, 0.0)
-                        lib.hideTextUI()
-                        openCustoms()
-                    end
-                end
-            end,
-        })
-
-        if not v.hideBlip then
-            local center = calculatePolyzoneCenter(v.points)
-            local blip = AddBlipForCoord(center.x, center.y, center.z)
-            SetBlipSprite(blip, v.blip.sprite or 72)
-            SetBlipColour(blip, v.blip.color or 4)
-            SetBlipScale(blip, v.blip.scale or 0.8)
-            SetBlipAsShortRange(blip, true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName(v.blip.label or 'Customs')
-            EndTextCommandSetBlipName(blip)
-        end
-    end
+RegisterNetEvent('qbx_customs:client:openCustoms', function()
+    SetEntityVelocity(cache.vehicle, 0.0, 0.0, 0.0)
+    openCustoms()
 end)
+
+if config.usingZone then
+    CreateThread(function()
+        for _, v in ipairs(sharedConfig.zones) do
+            lib.zones.poly({
+                points = v.points,
+                onEnter = function(s)
+                    zoneId = s.id
+                    if not cache.vehicle then return end
+                    checkAccess()
+
+                    if not allowAccess then
+                        return
+                    end
+
+                    lib.showTextUI(locale('textUI.tune'), {
+                        icon = 'fa-solid fa-car',
+                        position = 'left-center',
+                    })
+                end,
+                onExit = function()
+                    zoneId = nil
+                    lib.hideTextUI()
+                end,
+                inside = function()
+                    if cache.vehicle and allowAccess then
+                        if not lib.isTextUIOpen() then
+                            lib.showTextUI(locale('textUI.tune'), {
+                                icon = 'fa-solid fa-car',
+                                position = 'left-center',
+                            })
+                        end
+                        if IsControlJustPressed(0, 38) then
+                            SetEntityVelocity(cache.vehicle, 0.0, 0.0, 0.0)
+                            lib.hideTextUI()
+                            openCustoms()
+                        end
+                    end
+                end,
+            })
+
+            if not v.hideBlip then
+                local center = calculatePolyzoneCenter(v.points)
+                local blip = AddBlipForCoord(center.x, center.y, center.z)
+                SetBlipSprite(blip, v.blip.sprite or 72)
+                SetBlipColour(blip, v.blip.color or 4)
+                SetBlipScale(blip, v.blip.scale or 0.8)
+                SetBlipAsShortRange(blip, true)
+                BeginTextCommandSetBlipName('STRING')
+                AddTextComponentSubstringPlayerName(v.blip.label or 'Customs')
+                EndTextCommandSetBlipName(blip)
+            end
+        end
+    end)
+end
 
 lib.callback.register('qbx_customs:client:zone', function()
     return zoneId

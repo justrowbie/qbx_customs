@@ -14,7 +14,7 @@ local function priceLabel(price)
     table.remove(copy, 1)
 
     for i = 1, #copy do
-        copy[i] = ('%d: %s%s'):format(i, config.currency, copy[i])
+        copy[i] = ('level %d: %s%s'):format(i, config.currency, copy[i])
     end
 
     return table.concat(copy, ' | ')

@@ -84,3 +84,10 @@ RegisterNetEvent('qbx_customs:server:saveVehicleProps', function()
         MySQL.update.await('UPDATE player_vehicles SET mods = ? WHERE plate = ?', {json.encode(vehicleProps), vehicleProps.plate})
     end
 end)
+
+lib.addCommand('custom', {
+    help = 'Custom Vehicle (Admin Only)',
+    restricted = 'group.admin',
+}, function(source, args, raw)
+   TriggerClientEvent('qbx_customs:client:openCustoms', source)
+end)

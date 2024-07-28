@@ -1,4 +1,5 @@
 return {
+    usingZone = false,
     currency = '$',
     mods = {
         {id = 0,  label = 'Spoiler',              category = 'parts'},
